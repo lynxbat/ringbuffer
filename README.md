@@ -35,5 +35,9 @@ BenchmarkRead	5000000000	         6.21 ns/op	       0 B/op	       0 allocs/op
 ok  	github.com/lynxbat/ringbuffer	59.578s
 ```
 
+Test script:
+
+There is a command script in `scripts/ringbuffercmd.go` that is useful for seeing how this works while wiki and godoc is under work.
+
 
 
