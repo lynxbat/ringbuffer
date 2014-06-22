@@ -1,6 +1,9 @@
 lynxbat/ringbuffer
 ==========
 
+##Build Status [![Build Status](https://travis-ci.org/lynxbat/ringbuffer.svg?branch=master)](https://travis-ci.org/lynxbat/ringbuffer)
+======
+
 A Circular Buffer written in Go.
 
 This is a work in progress.
