@@ -1,69 +1,42 @@
+// Package ringbuffer provides a ring(circular) buffer with options on size, element type, and circular buffer type.
 package ringbuffer
 
 import "fmt"
 
+// RingBufferType(s):
+// 		Default / OneSlot = Uses a ring buffer that maintains one slot open. Good for larger ring buffers with small elements
+//		FillCount = TODO
+// 		MirrorBit = TODO
+// 		RWCount = TODO
+// 		Absolute = TODO
+// 		LastOp = TODO
+const (
+	Default RingBufferType = iota // 0
+	OneSlot RingBufferType = Default // == Default
+	FillCount RingBufferType = iota // 1
+	MirrorBit RingBufferType = iota // 2
+	RWCount RingBufferType = iota // 3
+	Absolute RingBufferType = iota // 4
+	LastOp RingBufferType = iota // 5
+)
 
-/*
-A read moves the Start index.
+// RingBufferType is a type of ring buffer.
+type RingBufferType int
 
-The Start existing on the same index as the End means the buffer is empty with nothing to be read. 
-* An empty buffer means nothing is read (return null) and no indexes move.
-
-************
-S = 1
-E = 1
-[ ] [ ] [ ] [ ] [ ]
-************
-
-A write moves the End index.
-* If the index is full a write moves the End and Start index
-
-The Start index equaling the End index + 1 means the buffer is full.
-
-************
-S = 2
-E = 1
-[4] [ ] [1] [2] [3]
-************
-
-*/
-
-/*
-	Implementation of Circular Buffer using always keep one slot open pattern
-	to differentiate between full and empty.
-*/
-
-/*
-
-TODO
-
-1. Interface for elements, allowing of X type of element
-2. tests tests tests
-3. Higher level lib file
-4. Interface for RingBuffer, type this one to be of the one slot open (spare slot) type
-5. Choice of Memory(non-persistent/fast) or File(persistent/slower) backed ringbuffer
-
-
-*/
-
-// BufferElement
-// Takes a BufferValue interface
-
-
+// An interface for a buffer element. Used by built-in element types.
 type bufferElement interface {
 	GetValue() elementValueType
 	WriteValue(elementValueType)
 }
 
+// TODO
 type elementValueType interface {}
 
-
-
-//
-
+// TODO
 type nilElement struct {
 }
 
+// Returns a nilElement
 func NewNilElement() bufferElement{
 	be := new(nilElement)
 	return be
@@ -73,18 +46,19 @@ func (ne *nilElement) GetValue() elementValueType{
 	return ne
 }
 
+// No-op Write method to satisfy BufferElement interface for nilElement.
 func (ie *nilElement) WriteValue(value elementValueType) {
 	// Do nothing
 }
 
-// integerElement
-
+// Returns a integerElement containing an int provided in value
 func NewIntegerElement(value int) bufferElement{
 	be := new(integerElement)
 	be.Value = value
 	return be
 }
 
+// Integer value based buffer element
 type integerElement struct {
 	Value int
 }
@@ -101,9 +75,9 @@ func (ie *integerElement) WriteValue(value elementValueType) {
 
 
 
-// ringBuffer
+// ringBufferOneSlot
 
-type ringBuffer struct {
+type ringBufferOneSlot struct {
 	Size int
 	Start int
 	End int
@@ -111,8 +85,9 @@ type ringBuffer struct {
 	ClearFlag bool
 }
 
-func NewRingBuffer(size int) *ringBuffer{
-	rb := new(ringBuffer)
+// Returns a ring buffer of the int size and RingBufferType provided
+func NewRingBuffer(size int, rb_type RingBufferType) *ringBufferOneSlot{
+	rb := new(ringBufferOneSlot)
 	rb.Size = size
 	rb.Start = 0
 	rb.End = 0
@@ -125,7 +100,7 @@ func NewRingBuffer(size int) *ringBuffer{
 	return rb
 }
 
-func (rb *ringBuffer) Free() {
+func (rb *ringBufferOneSlot) Free() {
 	// The size of the element array is the ring buffer size + 1
 	// which adds one slot which is always empty.
 	rb.Elements = make([]bufferElement, rb.Size + 1)
@@ -134,35 +109,16 @@ func (rb *ringBuffer) Free() {
 
 
 
-func (rb *ringBuffer) IsFull() bool{
+func (rb *ringBufferOneSlot) IsFull() bool{
 	return rb.Start == rb.next(rb.End)
 }
 
 
-func (rb *ringBuffer) IsEmpty() bool{
+func (rb *ringBufferOneSlot) IsEmpty() bool{
 	return rb.Start == rb.End
 }
 
-func (rb *ringBuffer) DebugPrint() {
-	fmt.Printf(" IsFull? [%t]\n", rb.IsFull())
-	fmt.Printf(" IsEmpty? [%t]\n", rb.IsEmpty())
-	fmt.Printf(" StartIndex? [%d]\n", rb.Start)
-	fmt.Printf(" EndIndex? [%d]\n ", rb.End)
-	for i, s := range rb.Elements {
-		switch e := s.(type) {
-		default:
-			fmt.Printf("[%#v]nil ", i)
-		case *nilElement:
-			fmt.Printf("[%#v]nil ", i)
-		case *integerElement:
-			// e := s.(*integerElement)
-			fmt.Printf("[%#v]%#v ", i, e.GetValue())
-		}		
-	}	
-	fmt.Print("\n\n")
-}
-
-func (rb *ringBuffer) Write(e bufferElement) {	
+func (rb *ringBufferOneSlot) Write(e bufferElement) {	
 	// TODO MAKE THREADSAFE
 	
 	// Write the value to the current End(write index)
@@ -180,7 +136,7 @@ func (rb *ringBuffer) Write(e bufferElement) {
 	
 }
 
-func (rb *ringBuffer) Read() bufferElement{
+func (rb *ringBufferOneSlot) Read() bufferElement{
 	if rb.IsEmpty() {
 		e := NewNilElement()
 		return e
@@ -198,7 +154,7 @@ func (rb *ringBuffer) Read() bufferElement{
 
 // Next returns the next int index for the int c_index provided
 // panics if index provided is out of bounds
-func (rb *ringBuffer) next(c_index int) int{
+func (rb *ringBufferOneSlot) next(c_index int) int{
 	// Ensure index is within the element bounds. Just a bit of go ahead and panic since we would panic.
 	if c_index + 1 > rb.Size + 1 {
 		panic(fmt.Sprintf("A index value was passed that is out of bounds [%d]. Max is [%d]", c_index, rb.Size - 1))
@@ -211,4 +167,26 @@ func (rb *ringBuffer) next(c_index int) int{
 		// Otherwise we increment the index int and return
 		return c_index + 1
 	}
+}
+
+
+
+//TODO REMOVE
+func (rb *ringBufferOneSlot) DebugPrint() {
+	fmt.Printf(" IsFull? [%t]\n", rb.IsFull())
+	fmt.Printf(" IsEmpty? [%t]\n", rb.IsEmpty())
+	fmt.Printf(" StartIndex? [%d]\n", rb.Start)
+	fmt.Printf(" EndIndex? [%d]\n ", rb.End)
+	for i, s := range rb.Elements {
+		switch e := s.(type) {
+		default:
+			fmt.Printf("[%#v]nil ", i)
+		case *nilElement:
+			fmt.Printf("[%#v]nil ", i)
+		case *integerElement:
+			// e := s.(*integerElement)
+			fmt.Printf("[%#v]%#v ", i, e.GetValue())
+		}		
+	}	
+	fmt.Print("\n\n")
 }

@@ -3,7 +3,7 @@ package ringbuffer
 import "testing"
 
 func TestWrite(t *testing.T) {
-	rb := NewRingBuffer(8)
+	rb := NewRingBuffer(8, Default)
 	for x := 1; x <= 16; x ++ {
 		ie := NewIntegerElement(x)
 		rb.Write(ie)
@@ -12,7 +12,7 @@ func TestWrite(t *testing.T) {
 
 func BenchmarkWrite(b *testing.B) {
 	size := 128
-	rb := NewRingBuffer(size)
+	rb := NewRingBuffer(size, Default)
 	
 	// Wrap several times
 	for x := 1; x <= 768; x ++ {
@@ -28,7 +28,7 @@ func BenchmarkWrite(b *testing.B) {
 }
 
 func BenchmarkRead(b *testing.B) {
-	rb := NewRingBuffer(128)	
+	rb := NewRingBuffer(128, Default)	
 	for x := 1; x <= 1024; x ++ {
 		ie := NewIntegerElement(x)
 		rb.Write(ie)

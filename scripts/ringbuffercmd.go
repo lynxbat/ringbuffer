@@ -9,7 +9,7 @@ func main() {
 	size := 100
 	to_write := 1000
 	
-	rb := ringbuffer.NewRingBuffer(size)
+	rb := ringbuffer.NewRingBuffer(size, ringbuffer.Default)
 	fmt.Print("**Initial ring buffer**\n")
 	rb.DebugPrint()
 	
