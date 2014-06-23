@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	size := 4
-	to_write := 6
+	size := 7
+	to_write := 12
 	
 	rb := ringbuffer.NewRingBuffer(size, ringbuffer.Default, true, true, 0)
 	fmt.Printf("**Initial ring buffer [size: %d]**\n", size)
