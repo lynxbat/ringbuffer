@@ -39,7 +39,7 @@ type ringBuffer interface {
 		
 	// private
 	next(int) int
-	clearAtIndex(int)
+	clearAtIndex(*int)
 }
 
 
@@ -50,6 +50,9 @@ type ringBufferOneSlot struct {
 	End int
 	Elements []bufferElement
 	ClearFlag bool
+	
+	// private
+	debug bool	
 }
 
 
@@ -66,7 +69,8 @@ func NewRingBuffer(things...interface{}) ringBuffer{
 	var ringbuffer_type RingBufferType = Default
 	var clear_flag bool = true
 	var log_enabled bool = true
-	var log_level int = 0	
+	var log_level int = 0
+	var debug bool = false	
 	
 	// size arg
 	if len(things) > 0 {
@@ -96,19 +100,22 @@ func NewRingBuffer(things...interface{}) ringBuffer{
 	// log_enable init
 	if log_enabled {
 		initLogging(log_level)
+		if log_level == 5 {
+			debug = true
+		}				
 	}
 	
 	// call correct type constructor
 	switch ringbuffer_type {
 	case Default:
 		log.Debug("Default ring buffer type selected")
-		return newOneSlotRingBuffer(size, clear_flag)
+		return newOneSlotRingBuffer(size, clear_flag, debug)
 	default:
 		panic("How did we get here?")
 	}
 }
 
-func newOneSlotRingBuffer(size int, clear_flag bool) *ringBufferOneSlot{
+func newOneSlotRingBuffer(size int, clear_flag bool, debug bool) *ringBufferOneSlot{
 	rb := new(ringBufferOneSlot)
 	log.Debug("Created new ring buffer - type [One Slot Open] size [%d]", size)
 	rb.Size = size
@@ -119,6 +126,8 @@ func newOneSlotRingBuffer(size int, clear_flag bool) *ringBufferOneSlot{
 	// You can enable this if you want easier debugging of ringbuffer structure as
 	// it will replace read or blank slot values with a nilElement type.
 	rb.ClearFlag = clear_flag
+	// Only enables debug printing if explictly on. This drastically improves Write/Read perf
+	rb.debug = debug
 	log.Debug("Clear flag is [%v]", clear_flag)	
 	rb.Free()
 	return rb
