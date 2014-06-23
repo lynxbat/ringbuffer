@@ -49,10 +49,10 @@ type ringBufferOneSlot struct {
 	Start int
 	End int
 	Elements []bufferElement
-	ClearFlag bool
 	
 	// private
 	debug bool	
+	clearFlag bool
 }
 
 
@@ -125,7 +125,7 @@ func newOneSlotRingBuffer(size int, clear_flag bool, debug bool) *ringBufferOneS
 	// Can be very expensive with high frequency writes and reads (13-20% overhead)
 	// You can enable this if you want easier debugging of ringbuffer structure as
 	// it will replace read or blank slot values with a nilElement type.
-	rb.ClearFlag = clear_flag
+	rb.clearFlag = clear_flag
 	// Only enables debug printing if explictly on. This drastically improves Write/Read perf
 	rb.debug = debug
 	log.Debug("Clear flag is [%v]", clear_flag)	
