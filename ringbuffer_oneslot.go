@@ -45,34 +45,33 @@ func (rb *ringBufferOneSlot) Write(e bufferElement) {
 	// If index is full we move the End(write) and Start(read) indexes
 	// else we just move the End(write) index
 	if rb.IsFull() {
-		if rb.ClearFlag {
+		if rb.clearFlag {
 			rb.clearAtIndex(&rb.Start)
 		}
 		rb.Start = rb.next(rb.Start)
 		if rb.debug { log.Debug("Ring buffer is full incremented Read index to [%d]", rb.Start) }
-	}
-	
+	}	
 	// Write the value to the current End(write index)
 	rb.Elements[rb.End] = e
-	if rb.debug { log.Debug("Writing [%v] to the index [%d]", e.GetValue(), rb.End) }
-	
+	if rb.debug { log.Debug("Writing [%v] to the index [%d]", e.GetValue(), rb.End) }	
 	rb.End = rb.next(rb.End)
 }
 
 func (rb *ringBufferOneSlot) Read() bufferElement{
 	if rb.IsEmpty() {
-		e := NewNilElement()
-		
+		e := NewNilElement()		
 		if rb.debug { log.Debug("Read nil value ring buffer is empty") }
 		return e
 	} else {
 		e := rb.Elements[rb.Start]
-		if rb.debug { log.Debug("Read [%v] from index [%d]", e.GetValue(), rb.Start) }
-		if rb.ClearFlag {
+		if rb.clearFlag {
 			rb.clearAtIndex(&rb.Start)
 		}
 		rb.Start = rb.next(rb.Start)		
-		if rb.debug { log.Debug("Incremented Read index to [%d]", rb.Start) }
+		if rb.debug {
+			log.Debug("Read [%v] from index [%d]", e.GetValue(), rb.Start)
+			log.Debug("Incremented Read index to [%d]", rb.Start)
+		}
 		return e
 	}
 }
