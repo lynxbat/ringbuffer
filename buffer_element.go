@@ -9,6 +9,27 @@ type bufferElement interface {
 // ElementType allows for different value types for GetValue() and WriteValue()
 type elementValueType interface {}
 
+
+// Returns a byteElement
+func NewByteElement(value byte) bufferElement{
+	be := new(byteElement)
+	be.Value = value
+	return be
+}
+
+type byteElement struct {
+	Value byte
+}
+
+func (be *byteElement) GetValue() elementValueType{
+	return be.Value
+}
+
+func (be *byteElement) WriteValue(value elementValueType) {
+	i := value.(byte) 
+	be.Value = i
+}
+
 // Returns a integerElement containing an int provided in value
 func NewIntegerElement(value int) bufferElement{
 	be := new(integerElement)
