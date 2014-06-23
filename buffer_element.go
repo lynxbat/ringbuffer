@@ -6,7 +6,7 @@ type bufferElement interface {
 	WriteValue(elementValueType)
 }
 
-// TODO
+// ElementType allows for different value types for GetValue() and WriteValue()
 type elementValueType interface {}
 
 // Returns a integerElement containing an int provided in value
