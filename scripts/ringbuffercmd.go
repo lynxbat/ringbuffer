@@ -6,11 +6,12 @@ import (
 )
 
 func main() {
-	size := 100
+	size := 8
 	to_write := 1000
 	
-	rb := ringbuffer.NewRingBuffer(size, ringbuffer.Default)
-	fmt.Print("**Initial ring buffer**\n")
+	rb := ringbuffer.NewRingBuffer(size)
+	// rb := ringbuffer.NewRingBuffer(size, ringbuffer.Default)
+	fmt.Printf("**Initial ring buffer [size: %d]**\n", size)
 	rb.DebugPrint()
 	
 	// Loop 16 times writing a new integer element	
@@ -20,7 +21,7 @@ func main() {
 		rb.Write(ie)
 	}
 	
-	fmt.Print("**16 sequence writes**\n")
+	fmt.Printf("**%d sequence writes**\n", to_write)
 	rb.DebugPrint()
 
 	fmt.Print("**Read out all values**\n")
